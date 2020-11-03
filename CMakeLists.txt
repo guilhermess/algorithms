@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.16)
+project(algorithms)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+include(Config)
+add_subdirectory(trees)
