@@ -3,7 +3,7 @@
 //
 
 #ifndef ALGORITHMS_TREES_AVL_AVLTREE_H_
-#define ALGORITHMS_TREES_AVL_AVLTREE_H_
+#define  ALGORITHMS_TREES_AVL_AVLTREE_H_
 
 #include <memory>
 #include <trees/bst.h>
@@ -14,8 +14,9 @@ namespace detail {
 template<typename T>
 class AVLNode : public trees::detail::BSTNode<T> {
  public:
-  explicit AVLNode() {}
-  [[nodiscard]] char balance() const { return balance_; }
+  explicit AVLNode();
+  [[nodiscard]] char balance() const;
+  void balance(char value);
 
  private:
   char balance_;
@@ -26,11 +27,15 @@ class AVLNode : public trees::detail::BSTNode<T> {
 template<typename T, typename Comparator = std::less<T>>
 class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
  public:
-  explicit AVLTree() {}
-  bool insert()
+  using iterator = typename BST<T,Comparator,detail::AVLNode<T>>::iterator;
+  using const_iterator = typename BST<T,Comparator,detail::AVLNode<T>>::const_iterator;
+  using value_type = T;
+
+  explicit AVLTree(const Comparator &key_comp = Comparator());
+
+  std::pair<iterator,bool> insert(value_type &&value) override;
 
  private:
-  std::unique_ptr<detail::AVLNode<T>> root_;
 };
 
 }
