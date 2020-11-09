@@ -12,11 +12,11 @@ namespace trees::avl {
 
 template<typename T, typename Comparator>
 AVLTree<T, Comparator>::AVLTree(Comparator const &comp)
-    : BST<T, Comparator, detail::AVLNode < T>>
-(comp) {
+    : BST<T, Comparator, detail::AVLNode<T>>
+          (comp) {
 }
 
-template<typename T, typename Comparator>
+/*template<typename T, typename Comparator>
 std::pair<typename AVLTree<T, Comparator>::iterator, bool>
 AVLTree<T, Comparator>::insert(value_type &&value) {
   return std::make_pair(this->end(), false);
@@ -28,7 +28,7 @@ typename AVLTree<T, Comparator>::iterator
 AVLTree<T, Comparator>::erase(const_iterator position) {
   return this->end();
 
-}
+}*/
 
 }
 #endif

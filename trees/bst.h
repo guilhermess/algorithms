@@ -12,75 +12,96 @@ namespace trees {
 
 namespace detail {
 
-template<typename T>
+template <typename T>
+struct BSTNodeTraits;
+
+template<typename T, typename NodeTraits = trees::detail::BSTNodeTraits<T>>
 class BSTNode {
+  using NodeType = typename NodeTraits::NodeType;
  public:
   inline explicit BSTNode(T &&data,
-                          BSTNode *parent = nullptr,
-                          std::unique_ptr<BSTNode> left = nullptr,
-                          std::unique_ptr<BSTNode> right = nullptr) : data_{std::forward<T>(data)},
-                                                                      parent_{parent},
-                                                                      left_{std::move(left)},
-                                                                      right_{std::move(right)} {
+                          NodeType *parent = nullptr,
+                          std::unique_ptr<NodeType> left = nullptr,
+                          std::unique_ptr<NodeType> right = nullptr) : data_{std::forward<T>(data)},
+                                                                       parent_{parent},
+                                                                       left_{std::move(left)},
+                                                                       right_{std::move(right)} {
   }
+
+  virtual ~BSTNode() {}
 
   inline T const &data() const { return data_; }
   inline T &data() { return data_; }
 
-  inline BSTNode *left() const { return left_.get(); }
-  inline BSTNode *right() const { return right_.get(); }
-  inline BSTNode *parent() const { return parent_; }
+  inline NodeType *left() const { return left_.get(); }
+  inline NodeType *right() const { return right_.get(); }
+  inline NodeType *parent() const { return parent_; }
 
-  inline std::unique_ptr<BSTNode> &&left_move() { return std::move(left_); }
-  inline std::unique_ptr<BSTNode> &&right_move() { return std::move(right_); }
+  inline std::unique_ptr<NodeType> &&left_move() { return std::move(left_); }
+  inline std::unique_ptr<NodeType> &&right_move() { return std::move(right_); }
 
-  inline BSTNode * leftmost() {
-    BSTNode * res = this;
+  inline NodeType *leftmost() {
+    NodeType *res = get_this();
     while (res->left()) {
       res = res->left();
     }
     return res;
   }
 
-  inline BSTNode *rightmost() {
-    BSTNode * res = this;
+  inline NodeType *rightmost() {
+    NodeType *res = get_this();
     while (res->right()) {
       res = res->right();
     }
     return res;
   }
 
-  inline void left(std::unique_ptr<BSTNode> &&node) {
+  inline void left(std::unique_ptr<NodeType> &&node) {
     left_ = std::move(node);
-    left_->parent(this);
+    left_->parent(get_this());
   }
-  inline void right(std::unique_ptr<BSTNode> &&node) {
+  inline void right(std::unique_ptr<NodeType> &&node) {
     right_ = std::move(node);
-    right_->parent(this);
+    right_->parent(get_this());
   }
 
-  inline void parent(BSTNode *node) {
+  inline void parent(NodeType *node) {
     parent_ = node;
   }
 
-  inline BSTNode *add_left(T &&data) {
-    left_ = std::make_unique<BSTNode>(std::forward<T>(data), this);
+  inline NodeType *add_left(T &&data) {
+    left_ = std::make_unique<NodeType>(std::forward<T>(data), get_this());
     return left_.get();
   }
 
-  inline BSTNode *add_right(T &&data) {
-    right_ = std::make_unique<BSTNode>(std::forward<T>(data), this);
+  inline NodeType *add_right(T &&data) {
+    right_ = std::make_unique<NodeType>(std::forward<T>(data), get_this());
     return right_.get();
   }
 
-  [[nodiscard]] inline bool child_is_left(BSTNode const *child) const { return left_.get() == child; }
-  [[nodiscard]] inline bool child_is_right(BSTNode const *child) const { return right_.get() == child; }
+  [[nodiscard]] inline bool child_is_left(NodeType const *child) const {
+    return left_.get() == child;
+  }
+  [[nodiscard]] inline bool child_is_right(NodeType const *child) const {
+    return right_.get() == child;
+  }
 
  private:
   T data_;
-  BSTNode *parent_;
-  std::unique_ptr<BSTNode> left_;
-  std::unique_ptr<BSTNode> right_;
+  NodeType *parent_;
+  std::unique_ptr<NodeType> left_;
+  std::unique_ptr<NodeType> right_;
+
+  NodeType *get_this() {
+    return dynamic_cast<NodeType*>(this);
+  }
+
+};
+
+template<typename T>
+struct BSTNodeTraits {
+  using NodeType = typename trees::detail::BSTNode<T, BSTNodeTraits>;
+
 };
 
 }

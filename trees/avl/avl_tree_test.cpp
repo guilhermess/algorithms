@@ -9,11 +9,11 @@
 namespace trees::avl::test {
 
 TEST(AVLTree, construct_avl_tree) {
-  //AVLTree<int> tree;
-  //EXPECT_EQ(tree.size(), 0);
- // tree.insert(10);
-//  auto itr = tree.find(10);
-//  EXPECT_EQ(*itr, 10);
+  AVLTree<int> tree;
+  EXPECT_EQ(tree.size(), 0);
+  tree.insert(10);
+  auto itr = tree.find(10);
+  EXPECT_EQ(*itr, 10);
 }
 
 }

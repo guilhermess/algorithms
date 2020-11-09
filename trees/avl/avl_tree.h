@@ -11,14 +11,22 @@
 namespace trees::avl {
 
 namespace detail {
+
 template<typename T>
-class AVLNode : public trees::detail::BSTNode<T> {
+struct AVLNodeTraits;
+
+template<typename T, typename NodeTraits = avl::detail::AVLNodeTraits<T>>
+class AVLNode : public trees::detail::BSTNode<T, NodeTraits> {
+  using NodeType = typename NodeTraits::NodeType;
  public:
   inline explicit AVLNode(T &&data,
-                          AVLNode *parent = nullptr,
-                          std::unique_ptr<AVLNode> left = nullptr,
-                          std::unique_ptr<AVLNode> right = nullptr)
-      : trees::detail::BSTNode<T>(std::forward<T>(data), parent, left, right) {}
+                          NodeType *parent = nullptr,
+                          std::unique_ptr<NodeType> left = nullptr,
+                          std::unique_ptr<NodeType> right = nullptr)
+      : trees::detail::BSTNode<T, NodeTraits>(std::forward<T>(data),
+                                              parent,
+                                              std::move(left),
+                                              std::move(right)) {}
 
   [[nodiscard]] char balance() const;
   void balance(char value);
@@ -27,6 +35,12 @@ class AVLNode : public trees::detail::BSTNode<T> {
   char balance_;
 
 };
+
+template<typename T>
+struct AVLNodeTraits {
+  using NodeType = typename trees::avl::detail::AVLNode<T, AVLNodeTraits>;
+};
+
 }
 
 template<typename T, typename Comparator = std::less<T>>
@@ -38,8 +52,8 @@ class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
 
   explicit AVLTree(Comparator const &comp = Comparator());
 
-  std::pair<iterator, bool> insert(value_type &&value) override;
-  iterator erase(const_iterator position) override;
+  //std::pair<iterator, bool> insert(value_type &&value) override;
+  //iterator erase(const_iterator position) override;
 
  private:
 };
