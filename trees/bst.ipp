@@ -227,7 +227,7 @@ std::pair<typename BST<T, Comparator, NodeType>::iterator, bool> BST<T,
 template<typename T, typename Comparator, typename NodeType>
 typename BST<T, Comparator, NodeType>::const_iterator BST<T,
                                                           Comparator,
-                                                          NodeType>::find(value_type &&value) const {
+                                                          NodeType>::find(value_type const &value) const {
   return const_iterator{find_node(value)};
 
 }
@@ -235,26 +235,26 @@ typename BST<T, Comparator, NodeType>::const_iterator BST<T,
 template<typename T, typename Comparator, typename NodeType>
 typename BST<T, Comparator, NodeType>::iterator BST<T,
                                                     Comparator,
-                                                    NodeType>::find(value_type &&value) {
-  return iterator{find_node(std::forward<value_type>(value))};
+                                                    NodeType>::find(value_type const &value) {
+  return iterator{find_node(value)};
 
 }
 
 template<typename T, typename Comparator, typename NodeType>
-NodeType *BST<T, Comparator, NodeType>::find_node(value_type &&value) const {
-  return find_node(std::forward<value_type>(value), root());
+NodeType *BST<T, Comparator, NodeType>::find_node(value_type const &value) const {
+  return find_node(value, root());
 }
 
 template<typename T, typename Comparator, typename NodeType>
-NodeType *BST<T, Comparator, NodeType>::find_node(value_type &&value, NodeType *node) const {
+NodeType *BST<T, Comparator, NodeType>::find_node(value_type const &value, NodeType *node) const {
   if (!node)
     return nullptr;
   if (!comp_(node->data(), value) && !comp_(value, node->data()))
     return node;
   if (comp_(value, node->data()))
-    return find_node(std::forward<value_type>(value), node->left());
+    return find_node(value, node->left());
   else
-    return find_node(std::forward<value_type>(value), node->right());
+    return find_node(value, node->right());
 }
 
 template<typename T, typename Comparator, typename NodeType>
@@ -262,38 +262,52 @@ typename BST<T, Comparator, NodeType>::iterator BST<T,
                                                     Comparator,
                                                     NodeType>::erase(const_iterator position) {
   auto node = position.current();
+  iterator itr = end();
   if (!node)
-    return end();
-  if (node->parent()) {
-    if (node->left()) {
-      if (node->right()) {
-        if (node->left()->right()) {
-          auto right_leftmost = node->right()->leftmost();
-          right_leftmost->left(std::move(node->left()->right_move()));
-        }
-        node->left()->right(std::move(node->right_move()));
+    return itr;
+  if (node->left()) {
+    if (node->right()) {
+      itr = iterator(node->right()->leftmost());
+      if (node->left()->right()) {
+        auto right_leftmost = node->right()->leftmost();
+        right_leftmost->left(std::move(node->left()->right_move()));
       }
-      if(node->parent()->child_is_left(node))
+      node->left()->right(std::move(node->right_move()));
+    }
+    if (node->parent()) {
+      if (node->parent()->child_is_left(node))
         node->parent()->left(std::move(node->left_move()));
       else
         node->parent()->right(std::move(node->left_move()));
     } else {
-     if (node->right()) {
-       if(node->parent()->child_is_left(node))
-         node->parent()->left(std::move(node->right_move()));
-       else
-         node->parent()->right(std::move(node->right_move()));
-     }
+      root_ = std::move(node->left_move());
     }
   } else {
-
+    if (node->right()) {
+      itr = iterator(node->right()->leftmost());
+      if (node->parent()) {
+        if (node->parent()->child_is_left(node))
+          node->parent()->left(std::move(node->right_move()));
+        else
+          node->parent()->right(std::move(node->right_move()));
+      } else {
+        root_ = std::move(node->right_move());
+      }
+    } else {
+      root_ = nullptr;
+    }
   }
   --size_;
-  return end();
+  return itr;
 }
 
 template<typename T, typename Comparator, typename NodeType>
-std::size_t BST<T, Comparator, NodeType>::erase(const value_type &value) {
+std::size_t BST<T, Comparator, NodeType>::erase(value_type const &value) {
+  auto itr = find(value);
+  if (itr != end()) {
+    erase(itr);
+    return 1;
+  }
   return 0;
 }
 

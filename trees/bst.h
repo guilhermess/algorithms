@@ -11,6 +11,7 @@
 namespace trees {
 
 namespace detail {
+
 template<typename T>
 class BSTNode {
  public:
@@ -145,15 +146,14 @@ class BST {
   [[nodiscard]] inline const_iterator end() const { return const_iterator(); }
 
   virtual std::pair<iterator, bool> insert(value_type &&value);
+  virtual iterator erase(const_iterator position);
+  std::size_t erase(value_type const &value);
+  iterator erase(const_iterator first, const_iterator last);
 
   [[nodiscard]] inline std::size_t size() const { return size_; }
 
-  [[nodiscard]] const_iterator find(value_type &&value) const;
-  [[nodiscard]] iterator find(value_type &&value);
-
-  iterator erase(const_iterator position);
-  std::size_t erase(const value_type &value);
-  iterator erase(const_iterator first, const_iterator last);
+  [[nodiscard]] const_iterator find(value_type const &value) const;
+  [[nodiscard]] iterator find(value_type const &value);
 
  protected:
   template<bool is_const> friend
@@ -167,8 +167,8 @@ class BST {
   std::size_t size_;
   std::unique_ptr<NodeType> root_;
 
-  [[nodiscard]] NodeType *find_node(value_type &&value) const;
-  [[nodiscard]] NodeType *find_node(value_type &&value, NodeType *node) const;
+  [[nodiscard]] NodeType *find_node(value_type const &value) const;
+  [[nodiscard]] NodeType *find_node(value_type const &value, NodeType *node) const;
 
 };
 

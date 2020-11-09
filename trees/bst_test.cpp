@@ -155,7 +155,8 @@ TEST(BST, insert_and_erase_child_left_and_right) {
   bst.insert(6);
   bst.insert(8);
   auto itr = bst.find(5);
-  bst.erase(itr);
+  auto next_itr = bst.erase(itr);
+  EXPECT_EQ(*next_itr, 6);
   EXPECT_EQ(print_const(bst), "1 2 3 4 6 7 8 ");
 }
 
@@ -167,7 +168,8 @@ TEST(BST, insert_and_erase_child_right_only) {
   bst.insert(6);
   bst.insert(8);
   auto itr = bst.find(5);
-  bst.erase(itr);
+  auto next_itr = bst.erase(itr);
+  EXPECT_EQ(*next_itr, 6);
   EXPECT_EQ(print_const(bst), "1 6 7 8 ");
 }
 
@@ -179,7 +181,8 @@ TEST(BST, insert_and_erase_child_left_only) {
   bst.insert(2);
   bst.insert(3);
   auto itr = bst.find(5);
-  bst.erase(itr);
+  auto next_itr = bst.erase(itr);
+  EXPECT_EQ(next_itr, bst.end());
   EXPECT_EQ(print_const(bst), "1 2 3 4 ");
 }
 
@@ -190,8 +193,37 @@ TEST(BST, insert_and_erase_root_child_right_only) {
   bst.insert(4);
   bst.insert(6);
   auto itr = bst.find(1);
-  bst.erase(itr);
+  auto next_itr = bst.erase(itr);
+  EXPECT_EQ(*next_itr, 4);
   EXPECT_EQ(print_const(bst), "4 5 6 ");
+}
+
+TEST(BST, insert_and_erase_root_child_left_and_right) {
+  BST<int> bst;
+  bst.insert(5);
+  bst.insert(3);
+  bst.insert(7);
+  bst.insert(4);
+  bst.insert(2);
+  bst.insert(6);
+  bst.insert(8);
+  auto itr = bst.find(5);
+  auto next_itr = bst.erase(itr);
+  EXPECT_EQ(print_const(bst), "2 3 4 6 7 8 ");
+  EXPECT_EQ(*next_itr, 6);
+}
+
+TEST(BST, insert_and_erase_by_value) {
+  BST<int> bst;
+  bst.insert(5);
+  bst.insert(3);
+  bst.insert(7);
+  bst.insert(4);
+  bst.insert(2);
+  bst.insert(6);
+  bst.insert(8);
+  EXPECT_EQ(bst.erase(3), 1);
+  EXPECT_EQ(print_const(bst), "2 4 5 6 7 8 ");
 }
 
 }
