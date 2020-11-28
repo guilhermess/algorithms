@@ -11,7 +11,7 @@
 namespace trees::test {
 
 template <typename T>
-std::string print_non_const(const BST<T> &bst) {
+std::string print_const(const BST<T> &bst) {
   std::ostringstream ss;
   for (auto &itr : bst) {
     ss << itr << " ";
@@ -20,7 +20,7 @@ std::string print_non_const(const BST<T> &bst) {
 }
 
 template <typename T>
-std::string print_const(BST<T> &bst) {
+std::string print_non_const(BST<T> &bst) {
   std::ostringstream ss;
   for (auto &itr : bst) {
     ss << itr << " ";
@@ -223,6 +223,7 @@ TEST(BST, insert_and_erase_by_value) {
   bst.insert(6);
   bst.insert(8);
   EXPECT_EQ(bst.erase(3), 1);
+  EXPECT_EQ(bst.size(), 6);
   EXPECT_EQ(print_const(bst), "2 4 5 6 7 8 ");
 }
 

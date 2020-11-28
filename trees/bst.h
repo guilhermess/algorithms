@@ -12,7 +12,7 @@ namespace trees {
 
 namespace detail {
 
-template <typename T>
+template<typename T>
 struct BSTNodeTraits;
 
 template<typename T, typename NodeTraits = trees::detail::BSTNodeTraits<T>>
@@ -32,6 +32,8 @@ class BSTNode {
 
   inline T const &data() const { return data_; }
   inline T &data() { return data_; }
+  inline void data(T &&data) { data_ = std::move(data); }
+  inline T &&data_move() { return std::move(data_); }
 
   inline NodeType *left() const { return left_.get(); }
   inline NodeType *right() const { return right_.get(); }
@@ -39,6 +41,21 @@ class BSTNode {
 
   inline std::unique_ptr<NodeType> &&left_move() { return std::move(left_); }
   inline std::unique_ptr<NodeType> &&right_move() { return std::move(right_); }
+
+  inline void replace_child(NodeType *child, std::unique_ptr<NodeType> new_child) {
+    if (this->child_is_left(child))
+      left(new_child);
+    else if (this->child_is_right(child))
+      right(new_child);
+  }
+
+  inline std::unique_ptr<NodeType> &&child_move(NodeType *child) {
+    if (this->child_is_left(child)) {
+      return left_move();
+    } else if (this->child_is_right(child))
+      return right_move();
+    assert(0);
+  }
 
   inline NodeType *leftmost() {
     NodeType *res = get_this();
@@ -56,13 +73,15 @@ class BSTNode {
     return res;
   }
 
-  inline void left(std::unique_ptr<NodeType> &&node) {
+  inline void left(std::unique_ptr<NodeType> node) {
     left_ = std::move(node);
-    left_->parent(get_this());
+    if (left_)
+      left_->parent(get_this());
   }
-  inline void right(std::unique_ptr<NodeType> &&node) {
+  inline void right(std::unique_ptr<NodeType> node) {
     right_ = std::move(node);
-    right_->parent(get_this());
+    if (right_)
+      right_->parent(get_this());
   }
 
   inline void parent(NodeType *node) {
@@ -86,6 +105,16 @@ class BSTNode {
     return right_.get() == child;
   }
 
+  [[nodiscard]] inline std::size_t height() const {
+    std::size_t loffset = 0;
+    if (this->left())
+      loffset = 1 + this->left()->height();
+    std::size_t roffset = 0;
+    if (this->right())
+      roffset = 1 + this->right()->height();
+    return std::max(loffset, roffset);
+  }
+
  private:
   T data_;
   NodeType *parent_;
@@ -93,7 +122,7 @@ class BSTNode {
   std::unique_ptr<NodeType> right_;
 
   NodeType *get_this() {
-    return dynamic_cast<NodeType*>(this);
+    return dynamic_cast<NodeType *>(this);
   }
 
 };
@@ -111,15 +140,16 @@ class BST {
  public:
   using value_type = T;
 
-  inline BST(Comparator comp = Comparator()) : comp_{comp}, size_{0} {}
-  inline virtual ~BST() {}
+  inline explicit BST(Comparator comp = Comparator()) : comp_{comp}, size_{0} {}
+  inline BST(BST &&src)  noexcept : comp_{src.comp_}, size_{src.size_}, root_{std::move(src.root_)} {}
+  inline virtual ~BST() = default;
 
   template<bool is_const = true>
   class base_iterator {
     using tree_type = std::conditional_t<is_const, BST const, BST>;
     using node_type = std::conditional_t<is_const, NodeType const, NodeType>;
    public:
-    using base_iterator_category = std::bidirectional_iterator_tag;
+    using iterator_category = std::bidirectional_iterator_tag;
     using value_type = std::conditional_t<is_const, T const, T>;
     using difference_type = std::ptrdiff_t;
     using pointer = std::conditional_t<is_const, T const *, T *>;
@@ -166,13 +196,16 @@ class BST {
   [[nodiscard]] inline const_iterator begin() const { return const_iterator(this); }
   [[nodiscard]] inline const_iterator end() const { return const_iterator(); }
 
-  virtual std::pair<iterator, bool> insert(value_type &&value);
+  virtual std::pair<iterator, bool> insert(value_type value);
+
   virtual iterator erase(const_iterator position);
   std::size_t erase(value_type const &value);
   iterator erase(const_iterator first, const_iterator last);
 
   [[nodiscard]] inline std::size_t size() const { return size_; }
-
+  [[nodiscard]] std::size_t height() const;
+  [[nodiscard]] std::size_t level(const_iterator position) const;
+  [[nodiscard]] std::size_t level(value_type const &value) const;
   [[nodiscard]] const_iterator find(value_type const &value) const;
   [[nodiscard]] iterator find(value_type const &value);
 
@@ -180,6 +213,12 @@ class BST {
   template<bool is_const> friend
   class base_iterator;
   inline NodeType *root() const { return root_.get(); };
+  inline NodeType *current(const const_iterator &itr) const { return itr.current(); }
+  inline void root(std::unique_ptr<NodeType> root) { root_ = std::move(root); }
+  inline void size(std::size_t newsize) { size_ = newsize; }
+
+  std::unique_ptr<NodeType> move_node_and_replace(NodeType *node,
+                                                  std::unique_ptr<NodeType> replacement);
 
   std::pair<iterator, bool> insert(value_type &&value, NodeType *node);
 
@@ -190,6 +229,8 @@ class BST {
 
   [[nodiscard]] NodeType *find_node(value_type const &value) const;
   [[nodiscard]] NodeType *find_node(value_type const &value, NodeType *node) const;
+
+  [[nodiscard]] std::size_t height(NodeType *node) const;
 
 };
 

@@ -184,14 +184,15 @@ typename BST<T, Comparator, NodeType>::template base_iterator<is_const>::referen
   if (current_) {
     return current_->data();
   }
+  //TODO: review return dummy or throw?
   return dummy_;
 }
 
 template<typename T, typename Comparator, typename NodeType>
 std::pair<typename BST<T, Comparator, NodeType>::iterator, bool> BST<T,
                                                                      Comparator,
-                                                                     NodeType>::insert(value_type &&value) {
-  return insert(std::forward<value_type>(value), root());
+                                                                     NodeType>::insert(value_type value) {
+  return insert(std::move(value), root());
 }
 
 template<typename T, typename Comparator, typename NodeType>
@@ -321,6 +322,59 @@ typename BST<T, Comparator, NodeType>::iterator BST<T,
     res = erase(first++);
   }
   return res;
+}
+
+template<typename T, typename Comparator, typename NodeType>
+std::unique_ptr<NodeType> BST<T,
+                              Comparator,
+                              NodeType>::move_node_and_replace(NodeType *node,
+                                                               std::unique_ptr<NodeType> replacement) {
+  if (node->parent()) {
+    if (node->parent()->child_is_left(node)) {
+      std::unique_ptr<NodeType> ret = node->parent()->left_move();
+      node->parent()->left(std::move(replacement));
+      return ret;
+    } else {
+      std::unique_ptr<NodeType> ret = node->parent()->right_move();
+      node->parent()->right(std::move(replacement));
+      return ret;
+    }
+  } else {
+    std::unique_ptr<NodeType> ret = std::move(root_);
+    root_ = std::move(replacement);
+    root_->parent(nullptr);
+    return ret;
+  }
+}
+
+template<typename T, typename Comparator, typename NodeType>
+std::size_t BST<T, Comparator, NodeType>::height() const {
+  return height(root_.get());
+}
+
+template<typename T, typename Comparator, typename NodeType>
+std::size_t BST<T, Comparator, NodeType>::height(NodeType *node) const {
+  std::size_t res = 0;
+  if (node) {
+    return node->height();
+  }
+  return res;
+}
+
+template<typename T, typename Comparator, typename NodeType>
+std::size_t BST<T, Comparator, NodeType>::level(const_iterator position) const {
+  int level = 0;
+  auto node = this->current(position);
+  while (node->parent()) {
+    ++level;
+    node = node->parent();
+  }
+  return level;
+}
+
+template<typename T, typename Comparator, typename NodeType>
+std::size_t BST<T, Comparator, NodeType>::level(value_type const &value) const {
+  return level(this->find(value));
 }
 
 }
