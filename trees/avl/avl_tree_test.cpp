@@ -510,4 +510,11 @@ TEST(AVLTree, insert_x) {
   EXPECT_TRUE(tree.check_balance());
   EXPECT_TRUE(tree.check_consistency());
 }
+
+TEST(AVLTree, copy_constructor_and_comparison) {
+  AVLTree<int> tree;
+  AVLTree<int> copy_tree{tree};
+  EXPECT_EQ(tree, copy_tree);
+}
+
 }

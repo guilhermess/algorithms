@@ -29,6 +29,10 @@ class AVLNode : public trees::detail::BSTNode<T, NodeTraits> {
                                               std::move(right)),
         balance_{0} {}
 
+  inline AVLNode(AVLNode const &src,
+                 AVLNode *parent) : trees::detail::BSTNode<T, NodeTraits>(src, parent),
+                                    balance_{src.balance_} {}
+
   [[nodiscard]] inline char balance() const { return balance_; }
   inline void balance(char value) {
     balance_ = value;
@@ -44,9 +48,12 @@ class AVLNode : public trees::detail::BSTNode<T, NodeTraits> {
     return (right_height - left_height) == balance_ && std::abs(balance_) < 2;
   }
 
+  [[nodiscard]] inline virtual bool operator==(NodeType const &other) const {
+    return trees::detail::BSTNode<T, NodeTraits>::operator==(other)
+        && balance() == other.balance();
+  }
  private:
   char balance_;
-
 };
 
 template<typename T>
@@ -66,21 +73,23 @@ class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
   using BST<T, Comparator, detail::AVLNode<T>>::erase;
 
   explicit AVLTree(Comparator const &comp = Comparator());
-  inline AVLTree(AVLTree &&src)  noexcept : BST<T, Comparator, detail::AVLNode<T>>(std::move(src)) {}
+  inline AVLTree(AVLTree &&src) noexcept: BST<T, Comparator, detail::AVLNode<T>>(std::move(src)) {}
+  inline AVLTree(AVLTree const &src) : BST<T, Comparator, detail::AVLNode<T>>(src) {}
 
   std::pair<iterator, bool> insert(value_type value) override;
   iterator erase(const_iterator position) override;
 
-  char balance(const_iterator position);
-  char balance(value_type const &value);
+  [[nodiscard]] char balance(const_iterator position);
+  [[nodiscard]] char balance(value_type const &value);
 
-  inline bool check_balance() const {
+  [[nodiscard]] inline bool check_balance() const {
     return check_balance(this->root());
   }
 
-  inline bool check_consistency() const {
+  [[nodiscard]] inline bool check_consistency() const {
     return check_consistency(this->root());
   };
+
 
  private:
   NodeType *rotate_left(NodeType *subroot, NodeType *right);
@@ -89,7 +98,7 @@ class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
   inline bool check_balance(NodeType *node) const {
     if (node) {
       if (!node->check_balance())
-      return node->check_balance() && check_balance(node->left()) && check_balance(node->right());
+        return node->check_balance() && check_balance(node->left()) && check_balance(node->right());
     }
     return true;
   }
@@ -108,7 +117,7 @@ class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
 
   void update_path_balance_insert(const_iterator position);
   void update_path_balance_erase(const_iterator position, int child_offset);
-  std::pair<bool,NodeType*> update_path_instance_erase(NodeType *parent, NodeType *node);
+  std::pair<bool, NodeType *> update_path_instance_erase(NodeType *parent, NodeType *node);
 
 };
 

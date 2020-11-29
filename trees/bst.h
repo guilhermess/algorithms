@@ -28,6 +28,13 @@ class BSTNode {
                                                                        right_{std::move(right)} {
   }
 
+  inline BSTNode(BSTNode const &src,
+                 NodeType *parent)
+      : data_{src.data_},
+        parent_{parent},
+        left_{src.left() ? std::make_unique<NodeType>(*src.left(), get_this()) : nullptr},
+        right_{src.right() ? std::make_unique<NodeType>(*src.right(), get_this()) : nullptr} {}
+
   virtual ~BSTNode() {}
 
   inline T const &data() const { return data_; }
@@ -119,6 +126,14 @@ class BSTNode {
     return (offset == -1) ? left() : (offset == 1) ? right() : nullptr;
   }
 
+  [[nodiscard]] inline virtual bool operator==(NodeType const &other) const {
+    bool left_match = compare(left(), other.left());
+    if (!left_match) return false;
+    bool right_match = compare(right(), other.right());
+    if (!right_match) return false;
+    return data() == other.data();
+  }
+
  private:
   T data_;
   NodeType *parent_;
@@ -127,6 +142,14 @@ class BSTNode {
 
   NodeType *get_this() {
     return dynamic_cast<NodeType *>(this);
+  }
+
+  [[nodiscard]] inline bool compare(NodeType const *a, NodeType const *b) const {
+    bool match;
+    if (!a && !b) match = true;
+    else if (!a || !b) match = false;
+    else match = *a == *b;
+    return match;
   }
 
 };
@@ -145,7 +168,11 @@ class BST {
   using value_type = T;
 
   inline explicit BST(Comparator comp = Comparator()) : comp_{comp}, size_{0} {}
-  inline BST(BST &&src)  noexcept : comp_{src.comp_}, size_{src.size_}, root_{std::move(src.root_)} {}
+  inline BST(BST &&src) noexcept: comp_{src.comp_}, size_{src.size_}, root_{std::move(src.root_)} {}
+  inline BST(BST const &src) : comp_{src.comp_},
+                               size_{src.size_},
+                               root_{(src.root()) ? std::make_unique<NodeType>(*src.root(), nullptr)
+                                                  : nullptr} {}
   inline virtual ~BST() = default;
 
   template<bool is_const = true>
@@ -213,6 +240,12 @@ class BST {
   [[nodiscard]] const_iterator find(value_type const &value) const;
   [[nodiscard]] iterator find(value_type const &value);
 
+  [[nodiscard]] inline bool operator==(BST const &other) const {
+    if (!root() && !other.root()) return true;
+    if (!root() || !other.root()) return false;
+    return *root() == *other.root();
+  }
+
  protected:
   template<bool is_const> friend
   class base_iterator;
@@ -223,7 +256,6 @@ class BST {
 
   std::unique_ptr<NodeType> move_node_and_replace(NodeType *node,
                                                   std::unique_ptr<NodeType> replacement);
-
   std::pair<iterator, bool> insert(value_type &&value, NodeType *node);
 
  private:
@@ -233,7 +265,6 @@ class BST {
 
   [[nodiscard]] NodeType *find_node(value_type const &value) const;
   [[nodiscard]] NodeType *find_node(value_type const &value, NodeType *node) const;
-
   [[nodiscard]] std::size_t height(NodeType *node) const;
 
 };
