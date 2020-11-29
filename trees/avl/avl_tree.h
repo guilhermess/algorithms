@@ -87,8 +87,10 @@ class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
   NodeType *rotate_right(NodeType *subroot, NodeType *left);
 
   inline bool check_balance(NodeType *node) const {
-    if (node)
+    if (node) {
+      if (!node->check_balance())
       return node->check_balance() && check_balance(node->left()) && check_balance(node->right());
+    }
     return true;
   }
 
@@ -105,7 +107,7 @@ class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
   }
 
   void update_path_balance_insert(const_iterator position);
-  void update_path_balance_erase(const_iterator position);
+  void update_path_balance_erase(const_iterator position, int child_offset);
   std::pair<bool,NodeType*> update_path_instance_erase(NodeType *parent, NodeType *node);
 
 };

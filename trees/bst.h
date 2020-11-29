@@ -115,6 +115,10 @@ class BSTNode {
     return std::max(loffset, roffset);
   }
 
+  [[nodiscard]] inline NodeType *child(int offset) const {
+    return (offset == -1) ? left() : (offset == 1) ? right() : nullptr;
+  }
+
  private:
   T data_;
   NodeType *parent_;

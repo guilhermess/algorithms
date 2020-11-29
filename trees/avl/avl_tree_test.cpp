@@ -28,7 +28,7 @@ AVLTree<int> insert_erase_test(std::vector<int> const &data,
       assert(tree.check_balance());
     }
   std::vector<int> tree_output(tree.begin(), tree.end());
-  std::vector<int> tree_data(numbers_set.begin(), numbers_set.end()) ;
+  std::vector<int> tree_data(numbers_set.begin(), numbers_set.end());
   EXPECT_EQ(tree.size(), tree_data.size());
   EXPECT_EQ(tree_data, tree_output);
   if (height > -2)
@@ -440,8 +440,8 @@ TEST(AVLTree, i1e1i8i10i5i6e5i3e1i12i7e8i9i4e4) {
 }
 
 TEST(AVLTree, i10i6i12i3i7i9i4e4) {
-  insert_erase_test({10,6,12,3,7,9,4,4},
-                    {0,0,0,0,0,0,0,1});
+  insert_erase_test({10, 6, 12, 3, 7, 9, 4, 4},
+                    {0, 0, 0, 0, 0, 0, 0, 1});
 }
 
 TEST(AVLTree, random_avl_vs_bst_height) {
@@ -464,15 +464,14 @@ TEST(AVLTree, random_avl_vs_bst_height) {
 }
 
 TEST(AVLTree, random_avl_insert_and_erase) {
-  auto size = 5000;
+  auto size = 2000;
   auto numbers = generate_random_data<unsigned int>(size);
   AVLTree<unsigned int> avl_tree;
-  std::default_random_engine generator(37);
+  std::default_random_engine generator(39);
   std::uniform_int_distribution<int> distribution(1, 10);
   std::set<unsigned int> numbers_set;
   for (int i = 0; i < numbers.size(); ++i) {
     auto number = numbers[i];
-    std::cerr << "insert " << number << " size: " << avl_tree.size() << std::endl;
     avl_tree.insert(number);
     assert(avl_tree.check_balance());
     assert(avl_tree.check_consistency());
@@ -481,7 +480,6 @@ TEST(AVLTree, random_avl_insert_and_erase) {
     if (erase) {
       std::uniform_int_distribution<int> index_distribution(0, i);
       auto erase_number = numbers[index_distribution(generator)];
-      std::cerr << "erase " << erase_number << " size: " << avl_tree.size() << std::endl;
       avl_tree.erase(erase_number);
       numbers_set.erase(erase_number);
       assert(avl_tree.check_balance());
@@ -494,4 +492,22 @@ TEST(AVLTree, random_avl_insert_and_erase) {
   EXPECT_EQ(numbers_from_set, numbers_from_avl_tree);
 }
 
+TEST(AVLTree, insert_6_3_8_2_4_7_9_1_erase_4) {
+  auto tree{erase_test({6, 3, 8, 2, 4, 7, 9, 1}, {4}, 2)};
+  EXPECT_TRUE(tree.check_balance());
+  EXPECT_TRUE(tree.check_consistency());
+}
+
+TEST(AVLTree, insert_10_5_15_4_6_13_16_3_12_14_erase_16) {
+  auto tree{erase_test({10, 5, 15, 4, 6, 13, 16, 3, 12, 14}, {16}, 3)};
+  EXPECT_TRUE(tree.check_balance());
+  EXPECT_TRUE(tree.check_consistency());
+}
+
+TEST(AVLTree, insert_x) {
+  auto tree{erase_test({200, 100, 300, 50, 150, 250, 350, 40, 60, 140, 160, 240, 260, 340, 360, 30, 45,
+                   55, 130, 230, 245, 255, 330, 35, 235}, {130}, 5)};
+  EXPECT_TRUE(tree.check_balance());
+  EXPECT_TRUE(tree.check_consistency());
+}
 }

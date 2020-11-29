@@ -49,95 +49,92 @@ AVLTree<T, Comparator>::erase(const_iterator position) {
     erase(const_iterator(next));
     return iterator(node);
   } else {
-    bool update_path = true;
+    auto child_offset = 0;
+    auto itr = ++iterator(node);
     if (parent && parent->child_is_left(node)) {
-      if (parent->balance() == 0)
-        update_path = false;
-      parent->balance(parent->balance() + 1);
+      child_offset = -1;
       parent->left(nullptr);
     } else if (parent && parent->child_is_right(node)) {
-      if (parent->balance() == 0)
-        update_path = false;
-      parent->balance(parent->balance() - 1);
       parent->right(nullptr);
+      child_offset = 1;
     } else {
       this->root(nullptr);
     }
     this->size(this->size() - 1);
-    if (update_path)
-      update_path_balance_erase(const_iterator(parent));
-
+    update_path_balance_erase(const_iterator(parent), child_offset);
+    return itr;
   }
   return this->end();
 }
 
 template<typename T, typename Comparator>
-std::pair<bool,
-          typename AVLTree<T, Comparator>::NodeType *>
-AVLTree<T, Comparator>::update_path_instance_erase(NodeType *parent,
-                                                   NodeType *node) {
-  if (parent->balance() == 2 && node->balance() >= 0) {
-    auto node_balance = node->balance();
-    rotate_left(parent, node);
-    node->balance(-1 + node_balance);
-    parent->balance(1 - node_balance);
-    return std::make_pair(true, node);
-  } else if (parent->balance() == -2 && node->balance() <= 0) {
-    auto node_balance = node->balance();
-    rotate_right(parent, node);
-    node->balance(1 + node_balance);
-    parent->balance(-1 - node_balance);
-    assert(parent->check_balance());
-    assert(node->check_balance());
-    return std::make_pair(true, node);
-  } else if (parent->balance() == 2 && node->balance() == -1) {
-    auto node_left_balance = node->left()->balance();
-    auto node_left = node->left();
-    rotate_right(node, node_left);
-    node_left->balance(0);
-    auto parent_right = parent->right();
-    rotate_left(parent, parent_right);
-    parent_right->balance(0);
-    if (node_left_balance > 0) {
-      parent->balance(-1);
-      node->balance(0);
+std::pair<bool, typename AVLTree<T, Comparator>::NodeType*>
+AVLTree<T, Comparator>::update_path_instance_erase(NodeType *curr,
+                                                   NodeType *child) {
+  if (curr->balance() == 2 && child->balance() >= 0) {
+    auto child_balance = child->balance();
+    rotate_left(curr, child);
+    child->balance(-1 + child_balance);
+    curr->balance(1 - child_balance);
+    assert(curr->check_balance());
+    assert(child->check_balance());
+    return std::make_pair(curr->balance() > 0, child);
+  } else if (curr->balance() == -2 && child->balance() <= 0) {
+    auto node_balance = child->balance();
+    rotate_right(curr, child);
+    child->balance(1 + node_balance);
+    curr->balance(-1 - node_balance);
+    assert(curr->check_balance());
+    assert(child->check_balance());
+    return std::make_pair(curr->balance() < 0, child);
+  } else if (curr->balance() == 2 && child->balance() == -1) {
+    auto child_left_balance = child->left()->balance();
+    auto child_left = child->left();
+    rotate_right(child, child_left);
+    child_left->balance(0);
+    auto curr_right = curr->right();
+    rotate_left(curr, curr_right);
+    curr_right->balance(0);
+    if (child_left_balance > 0) {
+      curr->balance(-1);
+      child->balance(0);
     } else {
-      if (node_left_balance == 0) {
-        parent->balance(0);
-        node->balance(0);
+      if (child_left_balance == 0) {
+        curr->balance(0);
+        child->balance(0);
       } else {
-        parent->balance(0);
-        node->balance(1);
+        curr->balance(0);
+        child->balance(1);
       }
     }
-    assert(parent->check_balance());
-    assert(node->check_balance());
-    return std::make_pair(false, nullptr);
-  } else if (parent->balance() == -2 && node->balance() == 1) {
-    auto node_right_balance = node->right()->balance();
-    auto node_right = node->right();
-    rotate_left(node, node_right);
-    node_right->balance(0);
-    auto parent_left = parent->left();
-    rotate_right(parent, parent_left);
-    parent_left->balance(0);
-    if (node_right_balance < 0) {
-      parent->balance(1);
-      node->balance(0);
+    assert(curr->check_balance());
+    assert(child->check_balance());
+    return std::make_pair(false, child_left);
+  } else if (curr->balance() == -2 && child->balance() == 1) {
+    auto child_right_balance = child->right()->balance();
+    auto child_right = child->right();
+    rotate_left(child, child_right);
+    child_right->balance(0);
+    auto curr_left = curr->left();
+    rotate_right(curr, curr_left);
+    curr_left->balance(0);
+    if (child_right_balance < 0) {
+      curr->balance(1);
+      child->balance(0);
     } else {
-      if (node_right_balance == 0) {
-        parent->balance(0);
-        node->balance(0);
+      if (child_right_balance == 0) {
+        curr->balance(0);
+        child->balance(0);
       } else {
-        parent->balance(0);
-        node->balance(-1);
+        curr->balance(0);
+        child->balance(-1);
       }
     }
-    assert(parent->check_balance());
-    assert(node->check_balance());
-    return std::make_pair(false, nullptr);
+    assert(curr->check_balance());
+    assert(child->check_balance());
+    return std::make_pair(false, child_right);
   }
-  return std::make_pair(true, nullptr);
+  return std::make_pair(false, curr);
 }
 
 template<typename T, typename Comparator>
@@ -145,192 +142,97 @@ void AVLTree<T, Comparator>::update_path_balance_insert(const_iterator position)
   if (position == this->end())
     return;
   auto curr = this->current(position);
-  while (curr && curr->parent()) {
-    auto parent = curr->parent();
-    parent->balance(parent->child_is_left(curr) ? parent->balance() - 1 : parent->balance() + 1);
-    if (parent->balance() == 0)
+  auto child_offset = 0; // left = -1, center = 0, right = 1
+  while (curr) {
+    curr->balance(curr->balance() + child_offset);
+    if (curr->balance() == 0 && child_offset != 0)
       break;
-    if (parent->balance() == 2 && curr->balance() == 1) {
-      rotate_left(parent, curr);
-      parent->balance(0);
+    auto child = curr->child(child_offset);
+    if (curr->balance() == 2 && child->balance() == 1) {
+      rotate_left(curr, child);
       curr->balance(0);
-      assert(parent->check_balance());
+      child->balance(0);
       assert(curr->check_balance());
+      assert(child->check_balance());
       break;
-    } else if (parent->balance() == -2 && curr->balance() == -1) {
-      rotate_right(parent, curr);
-      parent->balance(0);
+    } else if (curr->balance() == -2 && child->balance() == -1) {
+      rotate_right(curr, child);
       curr->balance(0);
-      assert(parent->check_balance());
+      child->balance(0);
       assert(curr->check_balance());
+      assert(child->check_balance());
       break;
-    } else if (parent->balance() == 2 && curr->balance() == -1) {
-      auto balance_curr_left = curr->left()->balance(); //y
-      auto curr_left = curr->left();
-      rotate_right(curr, curr_left);
-      curr_left->balance(0);
-      auto parent_right = parent->right();
-      rotate_left(parent, parent_right);
-      parent_right->balance(0);
-      if (balance_curr_left > 0) {
-        parent->balance(-1);
-        curr->balance(0);
-      } else {
-        if (balance_curr_left == 0) {
-          parent->balance(0);
-          curr->balance(0);
-        } else {
-          parent->balance(0);
-          curr->balance(1);
-        }
-      }
-      assert(parent->check_balance());
-      assert(curr->check_balance());
-      break;
-    } else if (parent->balance() == -2 && curr->balance() == 1) {
-      auto balance_curr_right = curr->right()->balance(); //y
+    } else if (curr->balance() == 2 && child->balance() == -1) {
+      auto balance_child_left = child->left()->balance();
+      auto child_left = child->left();
+      rotate_right(child, child_left);
+      child_left->balance(0);
       auto curr_right = curr->right();
       rotate_left(curr, curr_right);
       curr_right->balance(0);
-      auto parent_left = parent->left();
-      rotate_right(parent, parent_left);
-      parent_left->balance(0);
-      if (balance_curr_right < 0) {
-        parent->balance(1);
-        curr->balance(0);
+      if (balance_child_left > 0) {
+        curr->balance(-1);
+        child->balance(0);
       } else {
-        if (balance_curr_right == 0) {
-          parent->balance(0);
+        if (balance_child_left == 0) {
           curr->balance(0);
+          child->balance(0);
         } else {
-          parent->balance(0);
-          curr->balance(-1);
+          curr->balance(0);
+          child->balance(1);
         }
       }
-      assert(parent->check_balance());
       assert(curr->check_balance());
+      assert(child->check_balance());
+      break;
+    } else if (curr->balance() == -2 && child->balance() == 1) {
+      auto balance_child_right = child->right()->balance();
+      auto child_right = child->right();
+      rotate_left(child, child_right);
+      child_right->balance(0);
+      auto curr_left = curr->left();
+      rotate_right(curr, curr_left);
+      curr_left->balance(0);
+      if (balance_child_right < 0) {
+        curr->balance(1);
+        child->balance(0);
+      } else {
+        if (balance_child_right == 0) {
+          curr->balance(0);
+          child->balance(0);
+        } else {
+          curr->balance(0);
+          child->balance(-1);
+        }
+      }
+      assert(curr->check_balance());
+      assert(child->check_balance());
       break;
     }
-    curr = parent;
+    if (curr->parent())
+      child_offset = (curr->parent()->child_is_left(curr)) ? -1 : 1;
+    curr = curr->parent();
   }
 }
 
 template<typename T, typename Comparator>
-void AVLTree<T, Comparator>::update_path_balance_erase(const_iterator position) {
+void AVLTree<T, Comparator>::update_path_balance_erase(const_iterator position, int child_offset) {
   if (position == this->end())
     return;
   auto curr = this->current(position);
-  while (curr && curr->parent()) {
-    auto parent = curr->parent();
-    auto other = (parent->child_is_left(curr)) ? parent->right() : parent->left();
-    bool parent_balance_is_zero = (parent->balance() == 0);
-    parent->balance(parent->child_is_left(curr) ? parent->balance() + 1 : parent->balance() - 1);
-    if (parent->balance() == 2 && other->balance() >= 0) {
-      auto other_balance = other->balance();
-      rotate_left(parent, other);
-      other->balance(-1 + other_balance);
-      parent->balance(1 - other_balance);
-      curr = other;
-    } else if (parent->balance() == -2 && other->balance() <= 0) {
-      auto other_balance = other->balance();
-      rotate_right(parent, other);
-      other->balance(1 + other_balance);
-      parent->balance(-1 - other_balance);
-      curr = other;
-      assert(parent->check_balance());
-      assert(other->check_balance());
-    } else if (parent->balance() == 2 && other->balance() == -1) {
-      auto other_left_balance = other->left()->balance();
-      auto other_left = other->left();
-      rotate_right(other, other_left);
-      other_left->balance(0);
-      auto parent_right = parent->right();
-      rotate_left(parent, parent_right);
-      parent_right->balance(0);
-      if (other_left_balance > 0) {
-        parent->balance(-1);
-        other->balance(0);
-      } else {
-        if (other_left_balance == 0) {
-          parent->balance(0);
-          other->balance(0);
-        } else {
-          parent->balance(0);
-          other->balance(1);
-        }
-      }
-      assert(parent->check_balance());
-      assert(other->check_balance());
+  while (curr) {
+    auto other = curr->child(-1 * child_offset);
+    bool stop = (curr->balance() == 0);
+    curr->balance(curr->balance() - child_offset);
+    if (stop)
       break;
-    } else if (parent->balance() == -2 && other->balance() == 1) {
-      auto other_right_balance = other->right()->balance();
-      auto other_right = other->right();
-      rotate_left(other, other_right);
-      other_right->balance(0);
-      auto parent_left = parent->left();
-      rotate_right(parent, parent_left);
-      parent_left->balance(0);
-      if (other_right_balance < 0) {
-        parent->balance(1);
-        other->balance(0);
-      } else {
-        if (other_right_balance == 0) {
-          parent->balance(0);
-          other->balance(0);
-        } else {
-          parent->balance(0);
-          other->balance(-1);
-        }
-      }
-      assert(parent->check_balance());
-      assert(other->check_balance());
+    auto [new_stop, new_curr] = update_path_instance_erase(curr, other);
+    if (new_stop)
       break;
-    }
-    if (parent_balance_is_zero)
-      break;
+    curr = new_curr;
+    if (curr->parent())
+      child_offset = (curr->parent()->child_is_left(curr)) ? -1 : 1;
     curr = curr->parent();
-  }
-  if (curr && !curr->parent() && curr->balance() == -2) {
-    auto other = curr->left();
-    if (other->balance() == 1) {
-      auto other_right = other->right();
-      rotate_left(other, other_right);
-      other_right->balance(0);
-      auto curr_left = curr->left();
-      rotate_right(curr, curr_left);
-      curr_left->balance(0);
-      curr->balance(0);
-      other->balance(0);
-      assert(curr->check_balance());
-      assert(curr_left->check_balance());
-      assert(other->check_balance());
-    } else {
-      auto other_balance = other->balance();
-      rotate_right(curr, other);
-      other->balance(1 + other_balance);
-      curr->balance(-1 - other_balance);
-      assert(curr->check_balance());
-      assert(other->check_balance());
-    }
-  } else if (curr && !curr->parent() && curr->balance() == 2) {
-    auto other = curr->right();
-    if (other->balance() == -1) {
-      auto other_left = other->left();
-      rotate_right(other, other_left);
-      other_left->balance(0);
-      auto curr_right = curr->right();
-      rotate_left(curr, curr_right);
-      curr_right->balance(0);
-      curr->balance(0);
-      other->balance(0);
-    } else {
-      auto other_balance = other->balance();
-      rotate_left(curr, other);
-      other->balance(-1 + other_balance);
-      curr->balance(1 - other_balance);
-    }
-    assert(curr->check_balance());
-    assert(other->check_balance());
   }
 }
 
