@@ -464,7 +464,7 @@ TEST(AVLTree, random_avl_vs_bst_height) {
 }
 
 TEST(AVLTree, random_avl_insert_and_erase) {
-  auto size = 2000;
+  auto size = 50000;
   auto numbers = generate_random_data<unsigned int>(size);
   AVLTree<unsigned int> avl_tree;
   std::default_random_engine generator(39);
@@ -473,8 +473,6 @@ TEST(AVLTree, random_avl_insert_and_erase) {
   for (int i = 0; i < numbers.size(); ++i) {
     auto number = numbers[i];
     avl_tree.insert(number);
-    assert(avl_tree.check_balance());
-    assert(avl_tree.check_consistency());
     bool erase = distribution(generator) <= 3 && avl_tree.size() > 0;
     numbers_set.insert(number);
     if (erase) {
@@ -482,8 +480,6 @@ TEST(AVLTree, random_avl_insert_and_erase) {
       auto erase_number = numbers[index_distribution(generator)];
       avl_tree.erase(erase_number);
       numbers_set.erase(erase_number);
-      assert(avl_tree.check_balance());
-      assert(avl_tree.check_consistency());
     }
   }
   ASSERT_EQ(avl_tree.size(), numbers_set.size());

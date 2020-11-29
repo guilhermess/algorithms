@@ -90,7 +90,6 @@ class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
     return check_consistency(this->root());
   };
 
-
  private:
   NodeType *rotate_left(NodeType *subroot, NodeType *right);
   NodeType *rotate_right(NodeType *subroot, NodeType *left);
@@ -112,7 +111,6 @@ class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
       return left_consistent && right_consistent;
     }
     return true;
-
   }
 
   void update_path_balance_insert(const_iterator position);

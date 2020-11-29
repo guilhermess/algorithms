@@ -76,16 +76,12 @@ AVLTree<T, Comparator>::update_path_instance_erase(NodeType *curr,
     rotate_left(curr, child);
     child->balance(-1 + child_balance);
     curr->balance(1 - child_balance);
-    assert(curr->check_balance());
-    assert(child->check_balance());
     return std::make_pair(curr->balance() > 0, child);
   } else if (curr->balance() == -2 && child->balance() <= 0) {
     auto node_balance = child->balance();
     rotate_right(curr, child);
     child->balance(1 + node_balance);
     curr->balance(-1 - node_balance);
-    assert(curr->check_balance());
-    assert(child->check_balance());
     return std::make_pair(curr->balance() < 0, child);
   } else if (curr->balance() == 2 && child->balance() == -1) {
     auto child_left_balance = child->left()->balance();
@@ -107,8 +103,6 @@ AVLTree<T, Comparator>::update_path_instance_erase(NodeType *curr,
         child->balance(1);
       }
     }
-    assert(curr->check_balance());
-    assert(child->check_balance());
     return std::make_pair(false, child_left);
   } else if (curr->balance() == -2 && child->balance() == 1) {
     auto child_right_balance = child->right()->balance();
@@ -130,8 +124,6 @@ AVLTree<T, Comparator>::update_path_instance_erase(NodeType *curr,
         child->balance(-1);
       }
     }
-    assert(curr->check_balance());
-    assert(child->check_balance());
     return std::make_pair(false, child_right);
   }
   return std::make_pair(false, curr);
@@ -152,15 +144,11 @@ void AVLTree<T, Comparator>::update_path_balance_insert(const_iterator position)
       rotate_left(curr, child);
       curr->balance(0);
       child->balance(0);
-      assert(curr->check_balance());
-      assert(child->check_balance());
       break;
     } else if (curr->balance() == -2 && child->balance() == -1) {
       rotate_right(curr, child);
       curr->balance(0);
       child->balance(0);
-      assert(curr->check_balance());
-      assert(child->check_balance());
       break;
     } else if (curr->balance() == 2 && child->balance() == -1) {
       auto balance_child_left = child->left()->balance();
@@ -182,8 +170,6 @@ void AVLTree<T, Comparator>::update_path_balance_insert(const_iterator position)
           child->balance(1);
         }
       }
-      assert(curr->check_balance());
-      assert(child->check_balance());
       break;
     } else if (curr->balance() == -2 && child->balance() == 1) {
       auto balance_child_right = child->right()->balance();
@@ -205,8 +191,6 @@ void AVLTree<T, Comparator>::update_path_balance_insert(const_iterator position)
           child->balance(-1);
         }
       }
-      assert(curr->check_balance());
-      assert(child->check_balance());
       break;
     }
     if (curr->parent())
