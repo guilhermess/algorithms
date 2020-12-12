@@ -101,7 +101,6 @@ class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
     }
     return true;
   }
-
   inline bool check_consistency(NodeType *node) const {
     if (node) {
       bool left_consistent =

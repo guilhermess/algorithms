@@ -35,7 +35,7 @@ class BSTNode {
         left_{src.left() ? std::make_unique<NodeType>(*src.left(), get_this()) : nullptr},
         right_{src.right() ? std::make_unique<NodeType>(*src.right(), get_this()) : nullptr} {}
 
-  virtual ~BSTNode() {}
+  virtual ~BSTNode() { }
 
   inline T const &data() const { return data_; }
   inline T &data() { return data_; }
