@@ -5,3 +5,4 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 include(GoogleTest)
 include_directories(${PROJECT_SOURCE_DIR})
+

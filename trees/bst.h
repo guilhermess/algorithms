@@ -1,6 +1,26 @@
-//
-// Created by Guilherme Schlinker on 11/1/20.
-//
+/*
+MIT License
+
+Copyright (c) 2020 Guilherme Simoes Schlinker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #ifndef ALGORITHMS_TREES_BST_HXX_
 #define ALGORITHMS_TREES_BST_HXX_
@@ -61,7 +81,6 @@ class BSTNode {
       return left_move();
     } else if (this->child_is_right(child))
       return right_move();
-    assert(0);
   }
 
   inline NodeType *leftmost() {
@@ -186,12 +205,12 @@ class BST {
     using pointer = std::conditional_t<is_const, T const *, T *>;
     using reference = std::conditional_t<is_const, T const &, T &>;
 
-    template<typename = std::enable_if_t<is_const>>
-    base_iterator(const base_iterator<false> &src) : base_iterator{src.current()} {}
+    inline base_iterator(base_iterator<false> const &src) : base_iterator{src.current()} {}
+    inline base_iterator(base_iterator<true> const &src) : base_iterator{src.current()} {}
+
     explicit base_iterator(tree_type *bst);
     explicit base_iterator(NodeType *node);
     explicit base_iterator();
-    base_iterator(base_iterator const &src);
     base_iterator &operator++();
     base_iterator operator++(int);
     base_iterator &operator--();

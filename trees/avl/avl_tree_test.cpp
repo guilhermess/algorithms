@@ -1,6 +1,26 @@
-//
-// Created by Guilherme Schlinker on 11/1/20.
-//
+/*
+MIT License
+
+Copyright (c) 2020 Guilherme Simoes Schlinker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -21,11 +41,9 @@ AVLTree<int> insert_erase_test(std::vector<int> const &data,
     if (operation[i] == 0) {
       tree.insert(data[i]);
       numbers_set.insert(data[i]);
-      assert(tree.check_balance());
     } else {
       tree.erase(data[i]);
       numbers_set.erase(data[i]);
-      assert(tree.check_balance());
     }
   std::vector<int> tree_output(tree.begin(), tree.end());
   std::vector<int> tree_data(numbers_set.begin(), numbers_set.end());
@@ -489,22 +507,16 @@ TEST(AVLTree, random_avl_insert_and_erase) {
 }
 
 TEST(AVLTree, insert_6_3_8_2_4_7_9_1_erase_4) {
-  auto tree{erase_test({6, 3, 8, 2, 4, 7, 9, 1}, {4}, 2)};
-  EXPECT_TRUE(tree.check_balance());
-  EXPECT_TRUE(tree.check_consistency());
+  erase_test({6, 3, 8, 2, 4, 7, 9, 1}, {4}, 2);
 }
 
 TEST(AVLTree, insert_10_5_15_4_6_13_16_3_12_14_erase_16) {
-  auto tree{erase_test({10, 5, 15, 4, 6, 13, 16, 3, 12, 14}, {16}, 3)};
-  EXPECT_TRUE(tree.check_balance());
-  EXPECT_TRUE(tree.check_consistency());
+  erase_test({10, 5, 15, 4, 6, 13, 16, 3, 12, 14}, {16}, 3);
 }
 
 TEST(AVLTree, insert_x) {
-  auto tree{erase_test({200, 100, 300, 50, 150, 250, 350, 40, 60, 140, 160, 240, 260, 340, 360, 30, 45,
-                   55, 130, 230, 245, 255, 330, 35, 235}, {130}, 5)};
-  EXPECT_TRUE(tree.check_balance());
-  EXPECT_TRUE(tree.check_consistency());
+  erase_test({200, 100, 300, 50, 150, 250, 350, 40, 60, 140, 160, 240, 260, 340, 360, 30, 45,
+                   55, 130, 230, 245, 255, 330, 35, 235}, {130}, 5);
 }
 
 TEST(AVLTree, copy_constructor_and_comparison) {

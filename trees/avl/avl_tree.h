@@ -1,9 +1,29 @@
-//
-// Created by Guilherme Schlinker on 10/31/20.
-//
+/*
+MIT License
+
+Copyright (c) 2020 Guilherme Simoes Schlinker
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #ifndef ALGORITHMS_TREES_AVL_AVLTREE_H_
-#define  ALGORITHMS_TREES_AVL_AVLTREE_H_
+#define ALGORITHMS_TREES_AVL_AVLTREE_H_
 
 #include <memory>
 #include <trees/bst.h>
@@ -36,16 +56,6 @@ class AVLNode : public trees::detail::BSTNode<T, NodeTraits> {
   [[nodiscard]] inline char balance() const { return balance_; }
   inline void balance(char value) {
     balance_ = value;
-    if (balance_ > 0 && !this->right())
-      assert(false);
-    else if (balance_ < 0 && !this->left())
-      assert(false);
-  }
-
-  [[nodiscard]] inline bool check_balance() const {
-    auto left_height = (this->left()) ? 1 + this->left()->height() : 0;
-    auto right_height = (this->right()) ? 1 + this->right()->height() : 0;
-    return (right_height - left_height) == balance_ && std::abs(balance_) < 2;
   }
 
   [[nodiscard]] inline virtual bool operator==(NodeType const &other) const {
@@ -82,35 +92,9 @@ class AVLTree : public BST<T, Comparator, detail::AVLNode<T>> {
   [[nodiscard]] char balance(const_iterator position);
   [[nodiscard]] char balance(value_type const &value);
 
-  [[nodiscard]] inline bool check_balance() const {
-    return check_balance(this->root());
-  }
-
-  [[nodiscard]] inline bool check_consistency() const {
-    return check_consistency(this->root());
-  };
-
  private:
   NodeType *rotate_left(NodeType *subroot, NodeType *right);
   NodeType *rotate_right(NodeType *subroot, NodeType *left);
-
-  inline bool check_balance(NodeType *node) const {
-    if (node) {
-      if (!node->check_balance())
-        return node->check_balance() && check_balance(node->left()) && check_balance(node->right());
-    }
-    return true;
-  }
-  inline bool check_consistency(NodeType *node) const {
-    if (node) {
-      bool left_consistent =
-          !(node->left()) || (node->left()->parent() == node && check_consistency(node->left()));
-      bool right_consistent =
-          !(node->right()) || (node->right()->parent() == node && check_consistency(node->right()));
-      return left_consistent && right_consistent;
-    }
-    return true;
-  }
 
   void update_path_balance_insert(const_iterator position);
   void update_path_balance_erase(const_iterator position, int child_offset);
