@@ -206,7 +206,6 @@ class BST {
     using reference = std::conditional_t<is_const, T const &, T &>;
 
     inline base_iterator(base_iterator<false> const &src) : base_iterator{src.current()} {}
-    inline base_iterator(base_iterator<true> const &src) : base_iterator{src.current()} {}
 
     explicit base_iterator(tree_type *bst);
     explicit base_iterator(NodeType *node);
