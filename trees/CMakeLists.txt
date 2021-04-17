@@ -20,12 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-#add_library(trees SHARED
-#        bst_test.cpp)
-
-#target_link_libraries(ps1 PUBLIC ${OpenCV_LIBS})
-
+enable_testing()
 add_executable(trees_test bst_test.cpp avl/avl_tree_test.cpp)
 target_link_libraries(trees_test PUBLIC gtest_main)
 
-add_test(NAME trees_test COMMAND trees_test)
+include(GoogleTest)
+gtest_discover_tests(trees_test)
