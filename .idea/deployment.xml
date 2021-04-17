@@ -2,13 +2,13 @@
 <project version="4">
   <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="guilmo-docker (d5407ca6-435e-4833-bdae-5d99b762e8fe)">
+      <paths name="gss-desktop (01c0a6c5-19e3-4430-ad26-73b918fa00ae)">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/tmp.8MGYuUvvfZ" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/tmp.6rDSr2sQo5" local="$PROJECT_DIR$" />
           </mappings>
           <excludedPaths>
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-gss-desktop" />
           </excludedPaths>
         </serverdata>
       </paths>
