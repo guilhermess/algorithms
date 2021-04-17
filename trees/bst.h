@@ -160,7 +160,7 @@ class BSTNode {
   std::unique_ptr<NodeType> right_;
 
   NodeType *get_this() {
-    return dynamic_cast<NodeType *>(this);
+    return static_cast<NodeType *>(this);
   }
 
   [[nodiscard]] inline bool compare(NodeType const *a, NodeType const *b) const {
@@ -225,7 +225,6 @@ class BST {
 
    private:
     NodeType *current_;
-    value_type dummy_;
 
     [[nodiscard]] NodeType *down_rightmost(NodeType *node) const;
     [[nodiscard]] NodeType *down_leftmost(NodeType *node) const;
