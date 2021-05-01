@@ -196,10 +196,7 @@ namespace trees {
                                                                                          Comparator,
                                                                                          NodeType>::base_iterator<
     is_const>::operator*() {
-    if (current_) {
-      return current_->data();
-    }
-    return value_type();
+    return current_->data();
   }
 
   template<typename T, typename Comparator, typename NodeType>
