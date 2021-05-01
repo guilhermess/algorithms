@@ -29,12 +29,23 @@ namespace list {
   namespace detail {
     template<typename T>
     struct ListNode<T, ListLinkType::Single> {
+
+      template <typename U>
+      ListNode(U &&d, ListNode<T, ListLinkType::Single> *n) : data{std::forward<U>(d)}, next{n}
+      {}
+
       T data;
       ListNode<T, ListLinkType::Single> *next;
     };
 
     template<typename T>
     struct ListNode<T, ListLinkType::Double> {
+      template <typename U>
+      ListNode(U &&d,
+               ListNode<T, ListLinkType::Double> *n,
+               ListNode<T, ListLinkType::Double> *p) : data{std::forward<U>(d)}, next{n}, prev{p}
+      {}
+
       T data;
       ListNode<T, ListLinkType::Double> *next;
       ListNode<T, ListLinkType::Double> *prev;
